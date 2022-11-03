@@ -10,6 +10,12 @@ module.exports = function override(webpackConfig) {
     },
   });
 
+  webpackConfig.module.rules.push({
+    test: /\.tsx?$/,
+    resolve: {
+      extensions: [ '.tsx', '.ts', '.js' ],
+   }
+  });
   // Ignore source map warnings from node_modules.
   // See: https://github.com/facebook/create-react-app/pull/11752
   webpackConfig.ignoreWarnings = [/Failed to parse source map/];

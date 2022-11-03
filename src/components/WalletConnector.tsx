@@ -38,7 +38,7 @@ const WalletConnector = () => {
 			signature,
 		})
 		console.log(wallet)
-		metaplex.use(walletAdapterIdentity(wallet))
+		metaplex.use(walletAdapterIdentity(wallet.adapter))
 		// const nft = await metaplex.nfts().findByMint(
 		//     {
 		//         mintAddress
