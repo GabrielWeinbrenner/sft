@@ -1,0 +1,35 @@
+		// const lamports = await connection.getMinimumBalanceForRentExemption(100)
+		// const transaction = new Transaction().add(
+		// 	SystemProgram.transfer({
+		// 		fromPubkey: publicKey,
+		// 		toPubkey: Keypair.generate().publicKey,
+		// 		lamports,
+		// 	})
+		// )
+
+		// const {
+		// 	context: { slot: minContextSlot },
+		// 	value: { blockhash, lastValidBlockHeight },
+		// } = await connection.getLatestBlockhashAndContext()
+
+		// const signature = await sendTransaction(transaction, connection, {
+		// 	minContextSlot,
+		// })
+
+		// await connection.confirmTransaction({
+		// 	blockhash,
+		// 	lastValidBlockHeight,
+		// 	signature,
+		// })
+
+
+        		// const nft = await metaplex.nfts().findByMint(
+		//     {
+		//         mintAddress
+		//     }
+		// );
+		// 	const { uri } = await metaplex.nfts().uploadMetadata({
+		// 	name: "My off-chain name",
+		// 	description: "My off-chain description",
+		// 	image: "https://arweave.net/123",
+		// })

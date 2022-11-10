@@ -1,9 +1,9 @@
 import "./App.css"
 import { useEffect, useState, useMemo } from "react"
-import { Metaplex } from "@metaplex-foundation/js"
+import { Metaplex, Nft, Sft, walletAdapterIdentity } from "@metaplex-foundation/js"
 import Card from "./components/Card.js"
 import { Connection, clusterApiUrl, Keypair, PublicKey } from "@solana/web3.js"
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
+import { WalletAdapterNetwork, WalletNotConnectedError } from "@solana/wallet-adapter-base"
 import {
 	GlowWalletAdapter,
 	LedgerWalletAdapter,
@@ -22,39 +22,45 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui"
 import WalletConnector from "./components/WalletConnector"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import React, { FC, useCallback } from "react"
-// const connection = new Connection(clusterApiUrl("mainnet-beta"));
 let connection = new Connection(clusterApiUrl("devnet"), "confirmed")
 const metaplex = new Metaplex(connection)
 
 const tokenAddress = "CxkKDaBvtHqg8aHBVY8E4YYBsCfJkJVsTAEdTo5k4SEw"
-// https://www.arweave.org/
 
 function App() {
 	const [tokenAdr, setToken] = useState(tokenAddress)
 	const [newToken, setNewToken] = useState(tokenAddress)
-	const [data, setData] = useState(null)
-	const [imageSrc, setImage] = useState(null)
+	const [data, setData] = useState<any>(null)
+	const [imageSrc, setImage] = useState<any>(undefined)
 	const solNetwork = WalletAdapterNetwork.Devnet
 	const endpoint = useMemo(() => clusterApiUrl(solNetwork), [solNetwork])
-	const { publicKey, sendTransaction } = useWallet()
-	// initialise all the wallets you want to use
+	const { publicKey, sendTransaction, wallet } = useWallet()
 	const wallets = useMemo(() => [new PhantomWalletAdapter()], [solNetwork])
 
 	useEffect(() => {
 		console.log(metaplex)
-		const loadImageData = async (uri) => {
-			const response = await fetch(uri)
-			const { image } = await response.json()
-			setImage(image)
+		const getNftData = async (publicKey: PublicKey) => {
+			const mintAddress = publicKey;
+			const nft = await metaplex.nfts().findByMint({
+				mintAddress,
+			}) 
+			console.log(nft)
+			setData(nft.json)
+			setImage(nft.json?.image)
 		}
-
-		const getMetadata = async () => {
-			// await loadImageData(metadata.uri);
-			// setData(metadata);
-		}
-
-		getMetadata()
+		getNftData(new PublicKey(tokenAdr))
 	}, [tokenAdr])
+
+	useEffect(() => {
+		if(wallet){
+			metaplex.use(walletAdapterIdentity(wallet?.adapter))
+		}
+		if(publicKey){
+			metaplex.nfts().findAllByCreator({
+				creator: publicKey,
+			})
+		}
+	}, [])
 
 	return (
 		<ConnectionProvider endpoint={endpoint}>
@@ -62,11 +68,10 @@ function App() {
 				<WalletModalProvider>
 					<div className="App">
 						<WalletConnector />
-
 						<input
 							value={newToken}
 							onChange={(evt) => setNewToken(evt.target.value)}
-							size="100"
+							size={100}
 						/>
 						<button onClick={() => setToken(newToken)}>
 							Load metadata

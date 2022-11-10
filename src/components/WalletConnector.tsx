@@ -13,58 +13,37 @@ const WalletConnector = () => {
 	const { publicKey, sendTransaction, wallet, wallets } = useWallet()
 
 	const onClick = useCallback(async () => {
-		if (!publicKey) throw new WalletNotConnectedError()
-		const lamports = await connection.getMinimumBalanceForRentExemption(100)
-		const transaction = new Transaction().add(
-			SystemProgram.transfer({
-				fromPubkey: publicKey,
-				toPubkey: Keypair.generate().publicKey,
-				lamports,
-			})
-		)
-
-		const {
-			context: { slot: minContextSlot },
-			value: { blockhash, lastValidBlockHeight },
-		} = await connection.getLatestBlockhashAndContext()
-
-		const signature = await sendTransaction(transaction, connection, {
-			minContextSlot,
-		})
-
-		await connection.confirmTransaction({
-			blockhash,
-			lastValidBlockHeight,
-			signature,
-		})
-		console.log(wallet)
-		metaplex.use(walletAdapterIdentity(wallet.adapter))
-		// const nft = await metaplex.nfts().findByMint(
-		//     {
-		//         mintAddress
-		//     }
-		// );
-		const { uri } = await metaplex.nfts().uploadMetadata({
-			name: "My off-chain name",
-			description: "My off-chain description",
-			image: "https://arweave.net/123",
-		})
-
+		if(wallet){
+			metaplex.use(walletAdapterIdentity(wallet?.adapter))
+		}
 		const { nft } = await metaplex.nfts().create({
-			uri,
-			name: "My on-chain NFT",
-			sellerFeeBasisPoints: 250, // 2.5%
+			uri: "https://arweave.net/kvcs7TChT5MioXXuUdjq9wjiEFSFASxOWSaJ6ff9gNQ",
+			symbol: "HFT",
+			name: Math.random().toString(),
+			sellerFeeBasisPoints: 250,
 		})
-		console.log(nft)
 
 		console.log(nft)
-	}, [publicKey, sendTransaction, connection])
+	}, [])
 
+	const findNFTsByOwner = useCallback(async () => {
+		let nfts = {}
+		console.log(publicKey)
+		if(publicKey){
+			nfts = await metaplex.nfts().findAllByCreator({
+				creator: publicKey,
+			})
+		}
+		console.log(nfts);
+	}, [])
 	return (
 		<div>
 			<WalletMultiButton />
 			<button onClick={onClick} disabled={!publicKey}>
-				Send SOL to a random address!
+				Mint NFTs
+			</button>
+			<button onClick={findNFTsByOwner} disabled={!publicKey}>
+				Find NFTs
 			</button>
 		</div>
 	)
